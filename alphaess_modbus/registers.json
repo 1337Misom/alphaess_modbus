@@ -41,7 +41,7 @@
         "hex": "0x0014",
         "type": "register",
         "signed": false,
-        "decimals": 1,
+        "decimals": 0,
         "units": "V"
     },
     {
@@ -50,7 +50,7 @@
         "hex": "0x0015",
         "type": "register",
         "signed": false,
-        "decimals": 1,
+        "decimals": 0,
         "units": "V"
     },
     {
@@ -59,7 +59,7 @@
         "hex": "0x0016",
         "type": "register",
         "signed": false,
-        "decimals": 1,
+        "decimals": 0,
         "units": "V"
     },
     {
@@ -95,7 +95,7 @@
         "hex": "0x001A",
         "type": "register",
         "signed": false,
-        "decimals": 1,
+        "decimals": 2,
         "units": "HZ"
     },
     {
@@ -1860,7 +1860,7 @@
         "hex": "0x08D2",
         "type": "long",
         "signed": false,
-        "decimals": 1,
+        "decimals": 2,
         "units": "KWh"
     },
     {
