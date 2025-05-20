@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "alphaess-modbus"
-version = "0.1.1"
+version = "0.1.2"
 description = "Async Python 3 library to read ModBus from an AlphaESS inverter"
 authors = ["steve.parker"]
 license = "MIT"
