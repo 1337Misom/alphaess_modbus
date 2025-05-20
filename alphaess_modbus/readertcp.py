@@ -38,14 +38,14 @@ class ReaderTCP(Reader):
             await self.instrument.connect()
 
         if register['type'] == "long":
-            val = await self.instrument.read_holding_registers(int(register['address']), 2, slave=self.slave_id)
+            val = await self.instrument.read_holding_registers(int(register['address']), count=2, slave=self.slave_id)
             decoder = BinaryPayloadDecoder.fromRegisters(val.registers, byteorder='>', wordorder='>')
             if register['signed'] is True:
                 val = decoder.decode_32bit_int()
             else:
                 val = decoder.decode_32bit_uint()
         else:
-            val = await self.instrument.read_holding_registers(int(register['address']), 1, slave=self.slave_id)
+            val = await self.instrument.read_holding_registers(int(register['address']), count=1, slave=self.slave_id)
             decoder = BinaryPayloadDecoder.fromRegisters(val.registers, byteorder='>', wordorder='>')
             if register['signed'] is True:
                 val = decoder.decode_16bit_int()
