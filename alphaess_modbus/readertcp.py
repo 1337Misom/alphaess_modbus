@@ -1,14 +1,22 @@
 from pymodbus.client import AsyncModbusTcpClient
-from pymodbus.payload import BinaryPayloadDecoder
 import json
 from .reader import Reader
 from pathlib import Path
+
 
 class ReaderTCP(Reader):
     instrument: AsyncModbusTcpClient
     slave_id: int
 
-    def __init__(self, ip=None, port=502, slave_id=int(0x55), debug=False, json_file=None, formatter=None) -> None:
+    def __init__(
+        self,
+        ip=None,
+        port=502,
+        slave_id=int(0x55),
+        debug=False,
+        json_file=None,
+        formatter=None,
+    ) -> None:
         self.instrument = AsyncModbusTcpClient(ip, port=port)
         self.debug = debug
         self.slave_id = slave_id
@@ -19,7 +27,7 @@ class ReaderTCP(Reader):
         # Load register JSON
         if json_file is None:
             p = Path(__file__)
-            json_file = p.absolute().with_name('registers.json')
+            json_file = p.absolute().with_name("registers.json")
 
         try:
             f = open(json_file)
@@ -28,7 +36,7 @@ class ReaderTCP(Reader):
             raise RuntimeError(f"Could not find JSON file {json_file!r}")
 
     async def get_value(self, name) -> int:
-        """ Ask inverter for a specific register """
+        """Ask inverter for a specific register"""
         name = self.conform_name(name)
         register = await self.get_definition(name)
         if self.debug:
@@ -37,23 +45,43 @@ class ReaderTCP(Reader):
         if self.instrument.connected is False:
             await self.instrument.connect()
 
-        if register['type'] == "long":
-            val = await self.instrument.read_holding_registers(int(register['address']), count=2, slave=self.slave_id)
-            decoder = BinaryPayloadDecoder.fromRegisters(val.registers, byteorder='>', wordorder='>')
-            if register['signed'] is True:
-                val = decoder.decode_32bit_int()
-            else:
-                val = decoder.decode_32bit_uint()
-        else:
-            val = await self.instrument.read_holding_registers(int(register['address']), count=1, slave=self.slave_id)
-            decoder = BinaryPayloadDecoder.fromRegisters(val.registers, byteorder='>', wordorder='>')
-            if register['signed'] is True:
-                val = decoder.decode_16bit_int()
-            else:
-                val = decoder.decode_16bit_uint()
+        if register["type"] == "long":
+            val = await self.instrument.read_holding_registers(
+                int(register["address"]), count=2, slave=self.slave_id
+            )
 
-        if register['decimals'] > 0:
-            divisor = 10 ** register['decimals']
+            if register["signed"] is True:
+                val = self.instrument.convert_from_registers(
+                    val.registers,
+                    data_type=self.instrument.DATATYPE.INT32,
+                    word_order="big",
+                )
+            else:
+                val = self.instrument.convert_from_registers(
+                    val.registers,
+                    data_type=self.instrument.DATATYPE.UINT32,
+                    word_order="big",
+                )
+        else:
+            val = await self.instrument.read_holding_registers(
+                int(register["address"]), count=1, slave=self.slave_id
+            )
+
+            if register["signed"] is True:
+                val = self.instrument.convert_from_registers(
+                    val.registers,
+                    data_type=self.instrument.DATATYPE.INT16,
+                    word_order="big",
+                )
+            else:
+                val = self.instrument.convert_from_registers(
+                    val.registers,
+                    data_type=self.instrument.DATATYPE.UINT16,
+                    word_order="big",
+                )
+
+        if register["decimals"] > 0:
+            divisor = 10 ** register["decimals"]
             val = val / float(divisor)
 
         return val
